@@ -6,6 +6,7 @@ from pathlib import Path
 
 from home_maintenance.cli import main
 from home_maintenance.models import Note, ProjectState, Task
+from home_maintenance.storage import load_state, save_state
 
 
 class ProjectSmokeTests(unittest.TestCase):
@@ -26,6 +27,15 @@ class ProjectSmokeTests(unittest.TestCase):
 
         self.assertEqual(restored.notes[0].title, "One")
         self.assertEqual(restored.tasks[0].title, "Two")
+
+    def test_storage_round_trip(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "state.json"
+            save_state(path, ProjectState(notes=[Note(id="n1", title="Saved")]))
+
+            loaded = load_state(path)
+
+        self.assertEqual(loaded.notes[0].title, "Saved")
 
 
 if __name__ == "__main__":
